@@ -14,7 +14,6 @@ board = cv2.aruco.CharucoBoard_create(5,7,.1,.05,dictionary)
 img = board.draw((200*3,200*3))
 cv2.imwrite('../arucocodes/charuco.png', img)
 
-resolution = (960, 720)
 #Start capturing images for calibration
 
 REQUIRED_COUNT = 25
@@ -27,7 +26,9 @@ frameIdx = 0
 frameSpacing = 5
 success = False
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+if not (cap.isOpened()):
+    print("Could not open video device")
 while True:
   ret, frame = cap.read()
   gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

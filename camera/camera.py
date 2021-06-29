@@ -6,8 +6,9 @@ from calibration.undistort import undistort
 from calibration.transformer import transform
 import time
 
-resolution = (960, 720)
-cap = cv2.VideoCapture(0)
+resolution = (3840, 2160)
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+robotCenter = None
 
 
 def camera():
@@ -16,7 +17,7 @@ def camera():
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         dst = undistort(gray)
-        warped = transform(gray)
+        warped = transform(dst)
         cv2.imshow("gray", gray)
         cv2.imshow("dst", dst)
 

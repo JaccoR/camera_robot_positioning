@@ -9,43 +9,21 @@ import util as u
 from calibration.undistort import undistort
 
 
-def order_points(pts):
-    pts = np.squeeze(pts)
-    # initialzie a list of coordinates that will be ordered
-    # such that the first entry in the list is the top-left,
-    # the second entry is the top-right, the third is the
-    # bottom-right, and the fourth is the bottom-left
-    rect = np.zeros((4, 2), dtype="float32")
-    # the top-left point will have the smallest sum, whereas
-    # the bottom-right point will have the largest sum
-    s = np.sum(pts, axis=1)
-    rect[0] = pts[np.argmin(s)]
-    rect[2] = pts[np.argmax(s)]
-    # now, compute the difference between the points, the
-    # top-right point will have the smallest difference,
-    # whereas the bottom-left will have the largest difference
-    diff = np.diff(pts, axis=1)
-    rect[1] = pts[np.argmin(diff)]
-    rect[3] = pts[np.argmax(diff)]
-    # return the ordered coordinates
-    return rect
-
-
-def four_point_transform(upLeft, upRight, downLeft, downRight):
-    rect = [upLeft, upRight, downRight, downLeft]
+def four_point_transform(rect):
     # obtain a consistent order of the points and unpack them
     # individually
+    (tl, tr, br, bl) = rect
     # compute the width of the new image, which will be the
     # maximum distance between bottom-right and bottom-left
     # x-coordiates or the top-right and top-left x-coordinates
-    widthA = np.sqrt(((downRight[0] - downLeft[0]) ** 2) + ((downRight[1] - downLeft[1]) ** 2))
-    widthB = np.sqrt(((upRight[0] - upLeft[0]) ** 2) + ((upRight[1] - upLeft[1]) ** 2))
+    widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
     maxWidth = max(int(widthA), int(widthB))
     # compute the height of the new image, which will be the
     # maximum distance between the top-right and bottom-right
     # y-coordinates or the top-left and bottom-left y-coordinates
-    heightA = np.sqrt(((upRight[0] - downRight[0]) ** 2) + ((upRight[1] - downRight[1]) ** 2))
-    heightB = np.sqrt(((upLeft[0] - downLeft[0]) ** 2) + ((upLeft[1] - downLeft[1]) ** 2))
+    heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+    heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
     maxHeight = max(int(heightA), int(heightB))
     # now that we have the dimensions of the new image, construct
     # the set of destination points to obtain a "birds eye view",
@@ -63,39 +41,32 @@ def four_point_transform(upLeft, upRight, downLeft, downRight):
 
 perspectiveTransform = None
 
-cap = cv2.VideoCapture(0)  # video capture source camera (Here webcam of laptop)
+cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)  # video capture source camera (Here webcam of laptop)
 ret, frame = cap.read()  # return a single frame in variable `frame`
 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
+undist = undistort(gray)
 while (True):
-    cv2.imshow('img1', gray)  # display the captured image
+    cv2.imshow('img1', undist)  # display the captured image
     if cv2.waitKey(1) & 0xFF == ord('y'):  # save on pressing 'y'
         cv2.imwrite('images/c1.png', gray)
         cv2.destroyAllWindows()
         break
 
 cap.release()
-undist = undistort(gray)
+
 
 markerCorners, markerIds = u.detectAruco(undist)
 
-upLeft = None
-upRight = None
-downLeft = None
-downRight = None
-
 if len(markerIds) == 4:
-    upLeft = markerCorners[int(np.where(markerIds == [23])[0])]
-    upRight = markerCorners[int(np.where(markerIds == [24])[0])]
-    downLeft = markerCorners[int(np.where(markerIds == [25])[0])]
-    downRight = markerCorners[int(np.where(markerIds == [26])[0])]
+    upLeftCorner = np.squeeze(markerCorners[int(np.where(markerIds == [23])[0])])[2]
+    upRightCorner = np.squeeze(markerCorners[int(np.where(markerIds == [24])[0])])[3]
+    downLeftCorner = np.squeeze(markerCorners[int(np.where(markerIds == [25])[0])])[1]
+    downRightCorner = np.squeeze(markerCorners[int(np.where(markerIds == [26])[0])])[0]
 
-    upLeftCorner = order_points(upLeft)[2]
-    upRightCorner = order_points(upRight)[3]
-    downLeftCorner = order_points(downLeft)[1]
-    downRightCorner = order_points(downRight)[0]
+    rect = [upLeftCorner, upRightCorner, downRightCorner, downLeftCorner]
 
-    transform_matrix, maxWidth, maxHeight = four_point_transform(upLeftCorner, upRightCorner, downLeftCorner, downRightCorner)
+
+    transform_matrix, maxWidth, maxHeight = four_point_transform(rect)
     print(transform_matrix)
     u.saveJSON(r"C:\Users\reuli\Documents\Bachelor Assignment\Robot project\python\calibration\transformationMatrix",
                dict(transform_matrix=transform_matrix.tolist(), maxWidth=maxWidth, maxHeight=maxHeight))
