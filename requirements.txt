@@ -1,0 +1,11 @@
+#Package requirements for running the program
+
+future==0.18.2
+geojson==2.5.0
+iso8601==0.1.14
+numpy==1.20.2
+opencv-contrib-python==4.5.1.48
+opencv-python==4.5.1.48
+pyserial==3.5
+python-osc==1.7.4
+PyYAML==5.4.1
