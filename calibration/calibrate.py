@@ -4,9 +4,9 @@ import cv2
 import numpy as np
 import camera.camera as camera
 import util as u
+#this code will calibrate the camera using the aruco chessboard (Charucoboard)
 
-
-
+#define welke aruco dictonary er gebruikt wordt
 dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
 
 #drawing Charucoboard
@@ -26,7 +26,7 @@ frameIdx = 0
 frameSpacing = 5
 success = False
 
-cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 if not (cap.isOpened()):
     print("Could not open video device")
 while True:

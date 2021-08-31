@@ -1,6 +1,6 @@
 import math
 
-
+#berkent de snelheid van de motoren aan de hand van x y en x y goal coordinaten
 def calcMovement(x, y, xg, yg, speedcoef):
     xdir = (xg - x)
     ydir = (yg - y)

@@ -3,6 +3,9 @@ import util as u
 
 pixelSize = 200
 
+#generates 5 arucocodes, one for the robot and 4 for the corners.
+#if new robot is added a new aruco code should be generated here
+
 def markerPath(filename):
     return r"C:\Users\reuli\Documents\Bachelor Assignment\Robot project\python\arucocodes\\" + filename
 

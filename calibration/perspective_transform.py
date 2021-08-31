@@ -8,6 +8,7 @@ import numpy as np
 import util as u
 from calibration.undistort import undistort
 
+#code for running perspective transform
 
 def four_point_transform(rect):
     # obtain a consistent order of the points and unpack them
@@ -41,12 +42,15 @@ def four_point_transform(rect):
 
 perspectiveTransform = None
 
-cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)  # video capture source camera (Here webcam of laptop)
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # video capture source camera (Here webcam of laptop)
+
 ret, frame = cap.read()  # return a single frame in variable `frame`
+
 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 undist = undistort(gray)
+
 while (True):
-    cv2.imshow('img1', undist)  # display the captured image
+    cv2.imshow('img1', gray)  # display the captured image
     if cv2.waitKey(1) & 0xFF == ord('y'):  # save on pressing 'y'
         cv2.imwrite('images/c1.png', gray)
         cv2.destroyAllWindows()
@@ -54,9 +58,10 @@ while (True):
 
 cap.release()
 
+#saves corners of the markers with its id
+markerCorners, markerIds = u.detectAruco(gray)
 
-markerCorners, markerIds = u.detectAruco(undist)
-
+#makes the rectangle between the 4 points
 if len(markerIds) == 4:
     upLeftCorner = np.squeeze(markerCorners[int(np.where(markerIds == [23])[0])])[2]
     upRightCorner = np.squeeze(markerCorners[int(np.where(markerIds == [24])[0])])[3]
